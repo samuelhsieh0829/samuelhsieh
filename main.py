@@ -28,7 +28,8 @@ async def on_ready():
     print("Logging as {}".format(client.user))
     try:
         await client.tree.sync()
-        game = discord.Game("Cosplay 謝恩")
+        owner = await client.fetch_user(owner_id)
+        game = discord.Game("Cosplay {}".format(owner.name))
         await client.change_presence(activity=game)
     except Exception as e:
         print(e)
@@ -41,7 +42,7 @@ async def on_message(message: discord.Message):
     if time.time() - used_time < cooldown:
         print(time.time() - used_time)
         return
-    if not (("<@551395982756282369>" in message.content) or ("<@1230789209082564619>" in message.content)):
+    if not ((f"<@{client.user.id}>" in message.content) or (f"<@{owner_id}>" in message.content)):
         return
     async with message.channel.typing():
         global gpt
@@ -62,7 +63,7 @@ async def load_prompt(ctx: discord.Interaction):
         await ctx.response.send_message(f"<@{ctx.user.id}>是傻逼")
 
 @client.tree.command(name="history", description="View chat history")
-async def load_prompt(ctx: discord.Interaction):
+async def history(ctx: discord.Interaction):
     if check_user:
         print(gpt.chat_history)
         await ctx.response.send_message(gpt.chat_history)
@@ -71,7 +72,7 @@ async def load_prompt(ctx: discord.Interaction):
         await ctx.response.send_message(f"<@{ctx.user.id}>是傻逼")
 
 @client.tree.command(name="clear_history", description="Clear chat history")
-async def load_prompt(ctx: discord.Interaction):
+async def clear_history(ctx: discord.Interaction):
     if check_user:
         gpt.clear_history()
         await ctx.response.send_message("Done")
@@ -80,7 +81,7 @@ async def load_prompt(ctx: discord.Interaction):
         await ctx.response.send_message(f"<@{ctx.user.id}>是傻逼")
 
 @client.tree.command(name="change_prompt", description="Change base prompt")
-async def load_prompt(ctx: discord.Interaction, filename:str):
+async def change_prompt(ctx: discord.Interaction, filename:str):
     if check_user:
         gpt.clear_history()
         gpt.change_base_prompt(filename)
