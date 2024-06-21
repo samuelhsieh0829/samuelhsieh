@@ -1,6 +1,5 @@
 import discord
-from discord.ext import commands
-from discord import app_commands
+from discord.ext import commands, tasks
 import dotenv
 import os
 import GPT
@@ -23,14 +22,50 @@ def check_user(user_id:int):
     else:
         return False
 
+channel = int(os.getenv("DEFAULT_CHANNEL"))
+playing = ""
+
+@tasks.loop()
+async def command():
+    global channel, playing
+    cmd = input()
+    temp = cmd.split()
+    l = list(temp[0])
+    if l[0] == "/":
+        if temp[0] == "/channel":
+            if len(temp) != 1:
+                channel = temp[1]
+                channel_name = await client.fetch_channel(channel)
+                print(f"Channel Changed to {channel}, {channel_name}")
+            else:
+                channel_name = await client.fetch_channel(channel)
+                print(f"Channel = {channel}, {channel_name}")
+        elif temp[0] == "/play":
+            if len(temp) != 1:
+                activity = discord.Game(name=temp[1])
+                await client.change_presence(activity=activity)
+                playing = temp[1]
+                print(f"Play {temp[1]}")
+
+            else:
+                print(f"Playing {playing}")
+    else:
+        channel_name = await client.fetch_channel(channel)
+        print(f"Sending {cmd} to {channel}, {channel_name}")
+        talk = await client.fetch_channel(channel)
+        await talk.send(cmd)
+
 @client.event
 async def on_ready():
     print("Logging as {}".format(client.user))
     try:
+        global playing
         await client.tree.sync()
         owner = await client.fetch_user(owner_id)
-        game = discord.Game("Cosplay {}".format(owner.name))
+        playing = "Cosplay {}".format(owner.name)
+        game = discord.Game(playing)
         await client.change_presence(activity=game)
+        # command.start()
     except Exception as e:
         print(e)
 
@@ -65,8 +100,11 @@ async def load_prompt(ctx: discord.Interaction):
 @client.tree.command(name="history", description="View chat history")
 async def history(ctx: discord.Interaction):
     if check_user:
-        print(gpt.chat_history)
-        await ctx.response.send_message(gpt.chat_history)
+        try:
+            print(gpt.chat_history)
+            await ctx.response.send_message(gpt.chat_history + "\n" + len(gpt.chat_history))
+        except:
+            await ctx.response.send_message(len(gpt.chat_history))
     else:
         print(f"{ctx.user.name} tried to see chat history")
         await ctx.response.send_message(f"<@{ctx.user.id}>是傻逼")
