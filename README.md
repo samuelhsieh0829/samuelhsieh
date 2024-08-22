@@ -28,6 +28,6 @@ DEFAULT_CHANNEL = (discord channel id) <br>
 在後台可使用指令:
 * (任何文字) 在預設頻道DEFAULT_CHANNEL或者是/channel設定的頻道傳送輸入的內容
 * /channel (discord channel id) 可設定傳送訊息的頻道，不加上channel id則顯示目前頻道
-* /play (任何文字) 設定機器人正在玩的遊戲，不加文字參數則顯示目前遊戲
+* /play (任何文字) 設定機器人正在玩的遊戲，不加文字參數則顯示目前遊戲 <br>
 **注意**若要使用以上功能，須將main.py第68行的command.start()取消註解 <br>
 並且此功能因使用input()，可能會讓機器人在discord中的反應變慢，而且會使console不斷報錯，目前尚無解決方法
