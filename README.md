@@ -24,10 +24,8 @@ DEFAULT_CHANNEL = (discord channel id) <br>
 * /history 可查看機器人儲存的對話紀錄和數量 **注意** 當字數超過discord上限2000字時，只會回傳儲存數量，詳細記錄請直接查看程式運作的console(視窗)
 * /clear_history 清除對話紀錄
 * /change_prompt filename: (filename) 可更改人設檔案，通常用於測試回覆內容，並搭配/clear_history
-**注意**，以上指令只有擁有者可使用，其他人嘗試使用都~~是傻逼~~會被紀錄於console
+**注意**，以上指令只有擁有者可使用，其他人嘗試使用都~~是傻逼~~會被紀錄於console <br>
 在後台可使用指令:
 * (任何文字) 在預設頻道DEFAULT_CHANNEL或者是/channel設定的頻道傳送輸入的內容
 * /channel (discord channel id) 可設定傳送訊息的頻道，不加上channel id則顯示目前頻道
 * /play (任何文字) 設定機器人正在玩的遊戲，不加文字參數則顯示目前遊戲
-**注意**若要使用以上功能，須將main.py第68行的command.start()取消註解 <br>
-並且此功能因使用input()，可能會讓機器人在discord中的反應變慢，而且會使console不斷報錯，目前尚無解決方法
