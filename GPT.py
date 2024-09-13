@@ -24,9 +24,9 @@ class GPT:
             self.chat_history = []
             print("History cleared")
         if len(self.chat_history) == 0:
-            self.chat_history.append({"role": "user", "content": "{}\n{} : {}".format(self.base_prompt, user, message)})
+            self.chat_history.append({"role": "user", "content": "{} {} : {}".format(self.base_prompt, user, message)})
         else:
-            self.chat_history.append({"role": "user", "content": message})
+            self.chat_history.append({"role": "user", "content": str(user+" : "+message)})
         response = self._send_message(self.chat_history)
         content = response.choices[0].message.content
         self.chat_history.append({"role": "assistant", "content": content})
