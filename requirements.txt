@@ -1,3 +1,4 @@
-discord.py
-dotenv
-openai
+aioconsole==0.8.0
+discord.py==2.3.2
+openai==1.46.1
+python-dotenv==1.0.1
