@@ -53,11 +53,22 @@ async def command():
 
             else:
                 print(f"Playing {playing}")
+        elif temp[0] == "/add":
+            if len(temp) != 1:
+                user = await client.fetch_user(int(temp[1]))
+                print(f"Add {user.name}")
+                channel = await user.create_dm()
+                channel = channel.id
+            else:
+                print("No input")
     else:
-        channel_name = await client.fetch_channel(channel)
-        print(f"Sending {cmd} to {channel}, {channel_name}")
-        talk = await client.fetch_channel(channel)
-        await talk.send(cmd)
+        try:
+            channel_name = await client.fetch_channel(channel)
+            print(f"Sending {cmd} to {channel}, {channel_name}")
+            talk = await client.fetch_channel(channel)
+            await talk.send(cmd)
+        except Exception as e:
+            print(e)
 
 @client.event
 async def on_ready():
@@ -75,6 +86,8 @@ async def on_ready():
 
 @client.event
 async def on_message(message: discord.Message):
+    if message.channel.type.name == "private":
+        print(f"Message from {message.author.name} ({message.author.id})-> {message.content}")
     if not status:
         return
     if message.author == client.user:
