@@ -37,7 +37,8 @@ class GPT:
         completion = self._gpt.chat.completions.create(
         messages=message,
         model=self.model,
-        max_tokens=1024
+        max_tokens=1024,
+        temperature=0.7,
         )
         return completion
     
