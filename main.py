@@ -7,6 +7,10 @@ import time
 import aioconsole
 import logging
 from typing import Optional
+from collections import deque
+import pyaudio
+import io
+import threading
 
 dt_fmt = '%Y-%m-%d %H:%M:%S'
 formatter = logging.Formatter('\x1b[36m{asctime} {levelname:<8} {name}: \x1b[37m{message}\x1b[0m', dt_fmt, style='{')
@@ -29,6 +33,9 @@ used_time = time.time()
 status = True
 on__mention = True
 cooldown = True
+voice_record: dict[discord.VoiceClient, deque] = {}
+
+local_audio = io.BytesIO()
 
 def check_user(user_id:int):
     if user_id == owner_id:
@@ -71,6 +78,36 @@ async def command():
                 channel = channel.id
             else:
                 log.warning("No input")
+        elif temp[0] == "/join":
+            if len(temp) != 1:
+                vc_channel = await client.fetch_channel(int(temp[1]))
+                if vc_channel.type != discord.ChannelType.voice:
+                    log.warning("Not a voice channel")
+                    return
+                log.info(f"Join {vc_channel.name}")
+                vc_client = await vc_channel.connect()
+                send_audio_thread = threading.Thread(target=send_audio, args=(vc_client,))
+                send_audio_thread.start()
+            else:
+                log.warning("Please input channel id")
+        elif temp[0] == "/leave":
+            if len(temp) != 1:
+                vc_channel = await client.fetch_channel(int(temp[1]))
+
+                if vc_channel.type != discord.ChannelType.voice:
+                    log.warning("Not a voice channel")
+                    return
+                
+                log.info(f"Leave {vc_channel.name}")
+                voice_client = discord.utils.get(client.voice_clients, guild=vc_channel.guild)
+                if voice_client is None:
+                    log.warning("Not in a voice channel")
+                    return
+                
+                await voice_client.disconnect()
+
+            else:
+                log.warning("Please input channel id")
     else:
         try:
             channel_name = await client.fetch_channel(channel)
@@ -79,6 +116,50 @@ async def command():
             await talk.send(cmd)
         except:
             log.exception("Error while sending message:")
+
+# @tasks.loop(seconds=1)
+# async def record_audio():
+#     for vc, buffer in voice_record.items():
+#         if vc.is_connected():
+#             vc.record(discord.sinks.RawDataSink(buffer))
+#         else:
+#             log.info("Not connected")
+
+# @tasks.loop(seconds=1)
+# async def process_voice_command():
+#     for vc, buffer in voice_record.items():
+#         audio_file = write_buffer_to_tempfile(buffer)
+#         text = transcribe_audio(audio_file)
+#         if detect_trigger(text):
+#             response = gpt.generate_response(text)
+#             speech_file = generate_tts(response)
+#             vc.play(discord.FFmpegPCMAudio(speech_file))
+
+class MicrophoneAudio(discord.AudioSource):
+    def __init__(self):
+        self.p = pyaudio.PyAudio()
+        self.stream = self.p.open(
+            format=pyaudio.paInt16,
+            channels=2,
+            rate=48000,
+            input=True,
+            frames_per_buffer=960
+        )
+
+    def read(self):
+        return self.stream.read(960)
+
+    def is_opus(self):
+        return False  # We're sending raw PCM, not Opus
+
+    def cleanup(self):
+        self.stream.stop_stream()
+        self.stream.close()
+        self.p.terminate()
+
+def send_audio(vc: discord.VoiceClient):
+    audio_source = MicrophoneAudio()
+    vc.play(audio_source)
 
 @client.event
 async def on_ready():
@@ -116,6 +197,13 @@ async def on_message(message: discord.Message):
         response = gpt.message_request(message.content, user=message.author.name)
         if len(response.split("謝恩: ")) >= 2:
             response = str(response[1])
+
+        if ":genshin:" in response:
+            response = response.replace(":genshin:", "<:genshin:1206198964638974002>")
+
+        if ":val:" in response:
+            response = response.replace(":val:", "<:val:1157681820184350920>")
+
         used_time = time.time()
         await message.channel.send(response)
     
@@ -218,6 +306,36 @@ async def cooldownn(ctx: discord.Interaction, time:Optional[int]):
                 await ctx.response.send_message(f"Cooldown enabled, set to {time}", ephemeral=True)
     else:
         log.info(f"{ctx.user.name} tried to switch cooldown")
+        await ctx.response.send_message(f"<@{ctx.user.id}>是傻逼")
+
+@client.tree.command(name="join", description="Join a voice channel")
+async def join(ctx: discord.Interaction):
+    if check_user(ctx.user.id):
+        if ctx.user.voice is None:
+            await ctx.response.send_message("You are not in a voice channel")
+            return
+        channel = ctx.user.voice.channel
+        await channel.connect()
+        await ctx.response.send_message(f"Joined {channel}")
+    else:
+        log.info(f"{ctx.user.name} tried to use join")
+        await ctx.response.send_message(f"<@{ctx.user.id}>是傻逼")
+
+@client.tree.command(name="leave", description="Leave a voice channel")
+async def leave(ctx: discord.Interaction):
+    if check_user(ctx.user.id):
+        if ctx.user.voice is None:
+            await ctx.response.send_message("You are not in a voice channel")
+            return
+        channel = ctx.user.voice.channel
+        voice_client = discord.utils.get(client.voice_clients, guild=ctx.guild)
+        if voice_client is None:
+            await ctx.response.send_message("Not in a voice channel")
+            return
+        await voice_client.disconnect()
+        await ctx.response.send_message(f"Left {channel}")
+    else:
+        log.info(f"{ctx.user.name} tried to use leave")
         await ctx.response.send_message(f"<@{ctx.user.id}>是傻逼")
 
 client.run(token=dctoken)
