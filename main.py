@@ -338,4 +338,12 @@ async def cooldownn(ctx: discord.Interaction, time:Optional[int]):
 #         log.info(f"{ctx.user.name} tried to use leave")
 #         await ctx.response.send_message(f"<@{ctx.user.id}>是傻逼")
 
+@client.tree.on_error()
+async def on_error(interaction: discord.Interaction, error: Exception):
+    if isinstance(error, commands.CommandNotFound):
+        pass
+    else:
+        log.exception("Error in command:")
+        await interaction.response.send_message(f"Unknown Error: {error}", ephemeral=True)
+
 client.run(token=dctoken)
