@@ -14,13 +14,20 @@ log.addHandler(ch)
 dotenv.load_dotenv()
 
 class GPT:
-    def __init__(self) -> None:
-        self._gpt = openai.OpenAI(api_key=os.getenv("GPTTOKEN"))
+    def __init__(self, mode="GPT") -> None:
+        api_key = os.getenv(f"{mode}TOKEN")
+        model = os.getenv(f"{mode}MODEL")
+        if api_key is None or model is None:
+            raise ValueError(f"Environment variables for {mode}TOKEN or {mode}MODEL are not set.")
+        if mode == "GEMINI":
+            self._gpt = openai.OpenAI(api_key=api_key, base_url="https://generativelanguage.googleapis.com/v1beta/")
+        else:
+            self._gpt = openai.OpenAI(api_key=api_key)
         self.base_prompt_path = "base_prompt.txt"
         with open(self.base_prompt_path, "r") as f:
             self.base_prompt = f.read()
         self.chat_history = []
-        self.model = os.getenv("GPTMODEL")
+        self.model = model
         self.history_limit = int(os.getenv("LIMIT"))
     
     def load_prompt(self) -> None:

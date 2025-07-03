@@ -7,11 +7,15 @@ GPTMODEL = gpt-3.5-turbo (GPT模型) <br>
 COOLDOWN = 10 (秒，GPT請求間隔) <br>
 LIMIT = 20 (限制保留對話紀錄數量) <br>
 DEFAULT_CHANNEL = (discord channel id) <br>
+GEMINITOKEN = (gemini API token) <br>
+GEMINIMODEL = (gemeni模型) <br>
+MODE = GEMINI (換GPT則可使用OpenAI) <br>
 
 * GPTMODEL為請求對話時使用的模型，若預算充足，可填gpt-4o，效果(理論上)更佳
 * COOLDOWN用來防止被一堆訊息灌入，導致請求過多被限速(或者是帳單暴漲)，若預算充足、想做無隔聊天可設0
 * LIMIT為限制保留用戶+GPT的對話紀錄數量，因要做到連續對話須將過去用戶與GPT的所有對話一起送出，單次對話價格會越來越高
 * DEFALUT_CHANNEL用於command函式，預設傳送訊息的頻道
+* 嗯因為我的GPT額度過期了T_T所以現在多了Gemini的選項 然後可以透過MODE來調整使用的AI 想知道這裡的運作原理可以看`main.py`的第30行及`GPT.py`的第17~19行
 * 記得把括號去掉
 
 ## base_prompt.txt

@@ -27,7 +27,7 @@ owner_id = int(os.getenv("OWNERID"))
 cooldown_time = int(os.getenv("COOLDOWN"))
 
 client = commands.Bot(command_prefix="!", intents=discord.Intents.all())
-gpt = GPT.GPT()
+gpt = GPT.GPT(os.getenv("MODE", "GPT"))
 
 used_time = time.time()
 status = True
