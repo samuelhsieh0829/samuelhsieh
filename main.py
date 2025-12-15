@@ -308,6 +308,16 @@ async def cooldownn(ctx: discord.Interaction, time:Optional[int]):
         log.info(f"{ctx.user.name} tried to switch cooldown")
         await ctx.response.send_message(f"<@{ctx.user.id}>是傻逼")
 
+@client.tree.command(name="model", description="Change model")
+async def model(ctx: discord.Interaction, model_name:str):
+    if check_user(ctx.user.id):
+        global gpt
+        gpt.change_model(model_name)
+        await ctx.response.send_message(f"Model changed to {model_name}")
+    else:
+        log.info(f"{ctx.user.name} tried to change model")
+        await ctx.response.send_message(f"<@{ctx.user.id}>是傻逼")
+
 # @client.tree.command(name="join", description="Join a voice channel")
 # async def join(ctx: discord.Interaction):
 #     if check_user(ctx.user.id):

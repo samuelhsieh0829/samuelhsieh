@@ -31,6 +31,7 @@ MODE = GEMINI (換GPT則可使用OpenAI) <br>
   * /switch 決定機器人是否回復訊息
   * /on_mention 決定機器人是否只接受有被@的請求
   * /cooldown time: (冷卻時間)(可選) 可以切換機器人是否有回復訊息的冷卻時間，若有新增time參數則將冷卻時間設為time秒
+  * /model model_name: (模型名稱) 更改AI模型
   **注意**，以上指令只有擁有者可使用，其他人嘗試使用都~~是傻逼~~會被紀錄於console <br>
 * 在後台可使用指令:
   * (任何文字) 在預設頻道DEFAULT_CHANNEL或者是/channel設定的頻道傳送輸入的內容

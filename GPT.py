@@ -63,3 +63,7 @@ class GPT:
 
     def change_base_prompt(self, path):
         self.base_prompt_path = path
+
+    def change_model(self, model_name):
+        self.model = model_name
+        log.info(f"Model changed to {model_name}")
